@@ -15,11 +15,19 @@ namespace SnippetsApp
             String s = "Hello   the       World some of the  trick and   tips!";
             Console.Out.WriteLine(s.TrimAndReduce());
 
-            //BFSUtil
+            //DataGraphUtil
+
+            BinaryNode ex = new BinaryNode();
+            ex.Data = "nodeA";
+            Console.WriteLine("JSON form of an Binary Graph: ");
+            Console.WriteLine(ex.toJSONString());
+
 
             Console.ReadKey();
         }
     }
+
+
 
 
     //Extension methods must be defined in a static class
