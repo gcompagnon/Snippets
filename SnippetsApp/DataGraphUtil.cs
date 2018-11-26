@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -34,16 +35,23 @@ namespace SnippetsApp
             get
             {
                 if (_depth > -1)
+                {
                     return _depth;
-                else if (_left is null && _right is null )
+                }
+                else if (_left is null && _right is null)
+                {
                     return (_depth = 0);
+                }
                 else
                 {//recursive
-                    return ( _depth = Math.Max(_left.Depth, _right.Depth) + 1 );
-                }                    
+                    return (_depth = Math.Max(_left.Depth, _right.Depth) + 1);
+                }
             }
             set => _depth = value;
         }
+        [IgnoreDataMember]
+        public IEnumerable<BinaryNode> Children { get { return new[] { Left, Right }.Where(x => x != null); } }
+
         internal MemoryStream toJSON()
         {
             MemoryStream stream = new MemoryStream();
@@ -79,7 +87,7 @@ namespace SnippetsApp
     public static class BFSUtils
     {
         /// <summary>
-        /// Generic BFS using the root (1rst node) and its childre (enum of nodes)
+        /// Generic BFS using the root (1rst node) and its children (enum of nodes)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="root"></param>
@@ -151,4 +159,116 @@ namespace SnippetsApp
         #endregion
     }
 
+    /// <summary>
+    /// Implementation of Graph BFS
+    /// </summary>
+    public class BFSGraphUtils
+    {
+
+        //total no of vertices
+        private readonly int Vertices;
+        //adjency list array for all vertices.
+        private readonly List<Int32>[] adj;
+        /* Example : vertices=4
+         *      0->[1,2]
+         *      1->[2]
+         *      2->[0,3]
+         *      3->[]
+         */
+
+        //constructor
+        public BFSGraphUtils(int v)
+        {
+            Vertices = v;
+            adj = new List<Int32>[v];
+            //Instantiate adjacecny list for all vertices
+            for (int i = 0; i < v; i++)
+            {
+                adj[i] = new List<Int32>();
+            }
+
+        }
+
+        //Add edge from v->w
+        public void AddEdge(int v, int w)
+        {
+            adj[v].Add(w);
+        }
+
+        //Print BFS traversal
+        //s-> start node
+        //BFS uses queue as a base.
+        public void BFS(int s)
+        {
+            bool[] visited = new bool[Vertices];
+
+            //create queue for BFS
+            Queue<int> queue = new Queue<int>();
+            visited[s] = true;
+            queue.Enqueue(s);
+
+            //loop through all nodes in queue
+            while (queue.Count != 0)
+            {
+                //Dequeue a vertex from queue and print it.
+                s = queue.Dequeue();
+                Console.WriteLine("next->" + s);
+
+                //Get all adjacent vertices of s
+                foreach (Int32 next in adj[s])
+                {
+                    if (!visited[next])
+                    {
+                        visited[next] = true;
+                        queue.Enqueue(next);
+                    }
+                }
+
+            }
+        }
+
+        //DFS traversal 
+        // DFS uses stack as a base.
+        public void DFS(int s)
+        {
+            bool[] visited = new bool[Vertices];
+
+            //For DFS use stack
+            Stack<int> stack = new Stack<int>();
+            visited[s] = true;
+            stack.Push(s);
+
+            while (stack.Count != 0)
+            {
+                s = stack.Pop();
+                Console.WriteLine("next->" + s);
+                foreach (int i in adj[s])
+                {
+                    if (!visited[i])
+                    {
+                        visited[i] = true;
+                        stack.Push(i);
+                    }
+                }
+            }
+        }
+
+        public void PrintAdjacecnyMatrix()
+        {
+            for (int i = 0; i < Vertices; i++)
+            {
+                Console.Write(i + ":[");
+                string s = "";
+                foreach (var k in adj[i])
+                {
+                    s = s + (k + ",");
+                }
+                s = s.Substring(0, s.Length - 1);
+                s = s + "]";
+                Console.Write(s);
+                Console.WriteLine();
+            }
+        }
+
+    }
 }
